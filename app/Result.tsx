@@ -1,12 +1,31 @@
-import { Text, View } from 'react-native'
+import { Text, View, StyleSheet,Button } from 'react-native'
 import React, { Component } from 'react'
+import { useRouter } from 'expo-router';
 
-export default class Result extends Component {
-  render() {
+export default function Result () {
+
+  const router=useRouter()
+  
     return (
-      <View>
+      <View style={styles.container}>
         <Text>Result</Text>
+                <View>
+                  <Button title="back" onPress={router.back}></Button>
+                </View>
       </View>
     )
-  }
+  
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding:20,
+    flex:1,
+    flexDirection:"column",
+    backgroundColor: '#fff',
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  button:{padding:20}
+
+});
