@@ -1,6 +1,7 @@
 import { Text, View, StyleSheet,Button } from 'react-native'
 import React, { Component } from 'react'
 import { useRouter } from "expo-router";
+import Filters from './Filters';
 
 
 export default function Search ()  {
@@ -9,6 +10,16 @@ export default function Search ()  {
 
     return (
       <View style={styles.container}>
+        <Text>Filters</Text>
+        <Filters/>
+
+
+
+
+
+
+
+
         <Text>Search</Text>
         <View style={styles.button}>
       <Button title="Search" onPress={() => router.push("/Result")}></Button>
