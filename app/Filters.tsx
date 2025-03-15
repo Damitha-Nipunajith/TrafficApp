@@ -12,6 +12,8 @@ export default function Filters() {
   const [street, setStreet] = useState();
   const [date, setDate] = useState(new Date());
 
+  
+
   const [show, setShow] = useState(false);
   const onChange = (event:any, selectedDate?: Date) => {
       setShow(false);
@@ -58,7 +60,7 @@ export default function Filters() {
 <Text>Select Street Name</Text>
 <TextInput style={styles.picker} value={street} onChange={()=>{setStreet}}></TextInput>
 
-{/*------------ Select Date -----------------*/}
+{/*------------ Select Date (With in last three months) -----------------*/}
 
 <Text>Select Date</Text>
 <TextInput style={styles.picker} value={date.toDateString()} onPress={() => setShow(true)}  onChange={()=>{setDate}}></TextInput>
@@ -69,6 +71,8 @@ export default function Filters() {
           mode="date"
           display="default"
           onChange={onChange}
+          maximumDate={new Date()}
+          minimumDate={new Date(new Date().getFullYear(), new Date().getMonth()-3, new Date().getDate())}
         />
       )}
 
@@ -82,7 +86,6 @@ const styles = StyleSheet.create({
       height: 60,
       backgroundColor: '#Add8e6'
     
-
   }
 
 })
