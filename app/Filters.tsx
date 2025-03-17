@@ -60,6 +60,16 @@ export default function Filters() {
 <Text>Select Street Name</Text>
 <TextInput style={styles.picker} value={street} onChange={()=>{setStreet}}></TextInput>
 
+
+
+
+
+
+
+
+
+
+
 {/*------------ Select Date (With in last three months) -----------------*/}
 
 <Text>Select Date</Text>

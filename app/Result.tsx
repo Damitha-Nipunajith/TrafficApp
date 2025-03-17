@@ -19,27 +19,44 @@ export default function Result() {
   const [isAnyError, setIsAnyError] = useState(false)
   const errorMessage = 'An Error has Occured. Please Try Again'
 
-  const outPut = JSON.stringify(data?.features)
 
   //------------ function for display trimmed data ------------------
 
   const displayData = () => {
 
-    const [isVisible, setIsVisible] = useState(false)
+    interface incident{
+      id:number
+      properties:{
+        displayName:String;
+        roads:{mainStreet:String, suburb:String}[] 
+        adviceA:String;
+        adviceB:String;
+        otherAdvice:String;       
+      }
+    }
 
-    return (dataArray.map((item: object) => {
+    const [isVisible, setIsVisible] = useState(false)
+    const [selectedItem,setSelectedItem] = useState(1)
+
+    return (dataArray.map((item: incident, key: number) => {
       return (
 
-        <View style={styles.oneRowView}>
+        <View key={item.id} style={styles.oneRowView}>
           <Text >Incident: {JSON.stringify(item.properties.displayName)}</Text>
           <Text >Road: {JSON.stringify(item.properties.roads[0].mainStreet)}</Text>
           <Text >Suburb: {JSON.stringify(item.properties.roads[0].suburb)}</Text>
-          <View>
-            <Button title={isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible) }} ></Button>
+          <View style={styles.buttonRow}>
+            <View style={styles.button}> <Button  title={'Save'} onPress={() => {}} ></Button></View>
+            <View style={styles.button} ><Button title={selectedItem===item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItem(item.id) }} ></Button></View>
+         
+            
           </View>
-          {isVisible && <View>
+          {selectedItem===item.id && isVisible && <View>
+
+            <Text>Incident ID: {item.id}</Text>
             <Text >*** {JSON.stringify(item.properties.adviceA)}</Text>
             <Text >** {JSON.stringify(item.properties.adviceB)}</Text>
+            {/* <Text >* {JSON.stringify(item.properties.otherAdvice)}</Text> */}
 
           </View>}
 
@@ -49,18 +66,23 @@ export default function Result() {
 
   }
 
+//--------------------------------------------------------
 
+ //------------ function for fetch data ------------------
 
   const fetchdata = async () => {
 
     try {
       const response = await fetch(fetchURL, { method: 'GET', headers: { "Authorization": token } })
       const json = response.ok ? (await response.json()) : null
+
       // const filteredJson = json.filter((oneJason:any)=>oneJason.title.includes('SYD_WEST'))
       setData(json)
+      
       setDataArray(json?.features)
 
       setLoading(false)
+ 
 
 
       if (!response.ok || response.status === 404 || response.status === 500) {
@@ -74,10 +96,16 @@ export default function Result() {
     }
   }
 
+  //--------------------------------------------------------
+
+  //---------------- useEffect Hook ----------------------
+
   useEffect(() => {
     setIsAnyError(false)
     fetchdata()
   }, [loading])
+
+  //--------------------------------------------------------
 
   return (
     <ScrollView >
@@ -88,10 +116,9 @@ export default function Result() {
           <Button title="back" onPress={router.back}></Button>
         </View>
 
-        {/* <Text>{loading?'loading...':outPut}</Text> */}
+        <Text>{loading?'loading...':null}</Text>
         <Text>{isAnyError ? errorMessage : null}</Text>
         {displayData()}
-
 
       </View>
     </ScrollView>
@@ -107,11 +134,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  button: { padding: 20 },
+  button: { margin: 5 },
   oneRowView: {
     padding: 20,
     margin: 20,
     backgroundColor: 'pink'
+  },
+  buttonRow:{
+    width:200,
+    flexDirection:'row',
   }
 
 });
