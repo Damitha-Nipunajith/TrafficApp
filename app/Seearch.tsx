@@ -20,13 +20,7 @@ export default function Search ()  {
 
 
 
-        <Text>Search</Text>
-        <View style={styles.button}>
-      <Button title="Search" onPress={() => router.push("/Result")}></Button>
-        </View>
-        <View style={styles.button}>
-      <Button title="Go to Saved" onPress={() => router.push("/Saved")}></Button>
-        </View>
+
       </View>
     )
   

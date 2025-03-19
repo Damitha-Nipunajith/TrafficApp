@@ -24,34 +24,34 @@ export default function Result() {
 
   const displayData = () => {
 
-    interface incident{
-      id:number
-      properties:{
-        displayName:String;
-        roads:{mainStreet:String, suburb:String}[] 
-        adviceA:String;
-        adviceB:String;
-        otherAdvice:String;       
+    interface incident {
+      id: number
+      properties: {
+        displayName: String;
+        roads: { mainStreet: String, suburb: String }[]
+        adviceA: String;
+        adviceB: String;
+        otherAdvice: String;
       }
     }
 
     const [isVisible, setIsVisible] = useState(false)
-    const [selectedItem,setSelectedItem] = useState(1)
+    const [selectedItem, setSelectedItem] = useState(1)
 
-    return (dataArray.map((item: incident, key: number) => {
+    return (dataArray?.map((item: incident, key: number) => {
       return (
 
         <View key={item.id} style={styles.oneRowView}>
-          <Text >Incident: {JSON.stringify(item.properties.displayName)}</Text>
-          <Text >Road: {JSON.stringify(item.properties.roads[0].mainStreet)}</Text>
-          <Text >Suburb: {JSON.stringify(item.properties.roads[0].suburb)}</Text>
+          <Text >Incident: {JSON.stringify(item?.properties?.displayName)}</Text>
+          <Text >Road: {JSON.stringify(item?.properties?.roads[0]?.mainStreet)}</Text>
+          <Text >Suburb: {JSON.stringify(item?.properties?.roads[0]?.suburb)}</Text>
           <View style={styles.buttonRow}>
-            <View style={styles.button}> <Button  title={'Save'} onPress={() => {}} ></Button></View>
-            <View style={styles.button} ><Button title={selectedItem===item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItem(item.id) }} ></Button></View>
-         
-            
+            <View style={styles.button}> <Button title={'Save'} onPress={() => { }} ></Button></View>
+            <View style={styles.button} ><Button title={selectedItem === item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItem(item.id) }} ></Button></View>
+
+
           </View>
-          {selectedItem===item.id && isVisible && <View>
+          {selectedItem === item.id && isVisible && <View>
 
             <Text>Incident ID: {item.id}</Text>
             <Text >*** {JSON.stringify(item.properties.adviceA)}</Text>
@@ -66,9 +66,9 @@ export default function Result() {
 
   }
 
-//--------------------------------------------------------
+  //--------------------------------------------------------
 
- //------------ function for fetch data ------------------
+  //------------ function for fetch data ------------------
 
   const fetchdata = async () => {
 
@@ -78,11 +78,11 @@ export default function Result() {
 
       // const filteredJson = json.filter((oneJason:any)=>oneJason.title.includes('SYD_WEST'))
       setData(json)
-      
+
       setDataArray(json?.features)
 
       setLoading(false)
- 
+
 
 
       if (!response.ok || response.status === 404 || response.status === 500) {
@@ -116,7 +116,7 @@ export default function Result() {
           <Button title="back" onPress={router.back}></Button>
         </View>
 
-        <Text>{loading?'loading...':null}</Text>
+        <Text>{loading ? 'loading...' : null}</Text>
         <Text>{isAnyError ? errorMessage : null}</Text>
         {displayData()}
 
@@ -140,9 +140,9 @@ const styles = StyleSheet.create({
     margin: 20,
     backgroundColor: 'pink'
   },
-  buttonRow:{
-    width:200,
-    flexDirection:'row',
+  buttonRow: {
+    width: 200,
+    flexDirection: 'row',
   }
 
 });
