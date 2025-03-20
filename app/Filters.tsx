@@ -10,6 +10,7 @@ import Result from "./Result"
 
 export default function Filters() {
 
+
   const router = useRouter();
 
   // --------------- useState Hooks from Results sheet --------------------------
@@ -27,9 +28,9 @@ export default function Filters() {
 
   // --------------- end useState Hooks from Results sheet --------------------------
 
-  const [region, setRegion] = useState();
-  const [type, setType] = useState();
-  const [street, setStreet] = useState('');
+  const [region, setRegion] = useState('');
+  const [category, setCategory] = useState('');
+  const [suburb, setSuburb] = useState('');
   const [date, setDate] = useState(new Date());
 
   const [show, setShow] = useState(false);
@@ -68,20 +69,22 @@ export default function Filters() {
 
   //---------------- useEffect Hooks ----------------------
 
+  useEffect(()=>{},[])
+
   useEffect(() => {
     setIsAnyError(false)
     fetchdata()
-  }, [street])
+  }, [suburb])
 
 
   useEffect(() => {
-    if (!street) {
+    if (!suburb) {
       setFilteredArray([]); // Reset if street is empty
       return;
     }
     try {
 
-      const filteredJson = dataArray?.filter((item: any) => item?.properties?.roads[0]?.mainStreet?.toLowerCase()?.includes(street?.toLowerCase()))
+      const filteredJson = dataArray?.filter((item: any) => item?.properties?.roads[0]?.suburb?.toLowerCase()?.includes(suburb?.toLowerCase()))
 
       setFilteredArray(filteredJson)
     }
@@ -90,22 +93,21 @@ export default function Filters() {
     }
 
 
-  }, [street, isVisibleDisplayStreets])
+  }, [suburb, isVisibleDisplayStreets])
 
   //--------------------------------------------------------
 
-  //-------------- Display Street Function -------------------
+  //-------------- Display Suberb Function -------------------
 
-  function DisplayStreet() {
-
+  function DisplaySuburb() {
 
     return filteredArray?.map((item: any, key: number) => {
-      return (<TouchableOpacity key={item?.id} onPress={() => {
-        setStreet(item?.properties?.roads[0]?.mainStreet),
+      return (<View><TouchableOpacity key={item?.id} onPress={() => {
+        setSuburb(item?.properties?.roads[0]?.suburb),
           setIsVisibleDisplayStreets(false)
       }} > <Text key={item?.id}>
-          {JSON.stringify(item?.properties?.roads[0]?.mainStreet)}
-        </Text></TouchableOpacity>
+          {JSON.stringify(item?.properties?.roads[0]?.suburb)}
+        </Text></TouchableOpacity></View>
       )
     })
 
@@ -125,35 +127,43 @@ export default function Filters() {
         onValueChange={(itemValue, itemIndex) =>
           setRegion(itemValue)
         }>
-        <Picker.Item label="Northern NSW" value="NorthernNSW" />
-        <Picker.Item label="Western NSW" value="WesternNSW" />
-        <Picker.Item label="Southern NSW" value="SouthernNSW" />
-        <Picker.Item label="Western Sydney" value="WesternSydney" />
-        <Picker.Item label="North Sydney" value="NorthSydney" />
-        <Picker.Item label="Metro Sydney" value="MetroSydney" />
-        <Picker.Item label="South Sydney" value="SouthSydney" />
+        <Picker.Item label="Select A Region" value="" />
+        <Picker.Item label="Sydney" value="Sydney" />
+        <Picker.Item label="Central NSW" value="Central NSW" />
+        <Picker.Item label="South Coast" value="South Coast" />
+        <Picker.Item label="Snowy Mountains" value="Snowy Mountains" />
+        <Picker.Item label="Hunter" value="Hunter" />
+        <Picker.Item label="The Murray" value="The Murray" />
+        <Picker.Item label="Riverina" value="Riverina" />
+        <Picker.Item label="Blue Mountains" value="Blue Mountains" />
+        <Picker.Item label="Far West NSW" value="Far West NSW" />
+        <Picker.Item label="North Coast NSW" value="North Coast NSW" />
+        <Picker.Item label="Central Coast" value="Central Coast" />
+        <Picker.Item label="Southern Highlands" value="Southern Highlands" />
       </Picker>
 
       {/*------------ Select Accident Type -----------------*/}
 
-      <Text>Select Accident Type</Text>
+      <Text>Select Incident Type</Text>
       <Picker style={styles.picker}
-        selectedValue={type}
+        selectedValue={category}
         onValueChange={(itemValue, itemIndex) =>
-          setType(itemValue)
+          setCategory(itemValue)
         }>
-        <Picker.Item label="Accident" value="Accident" />
-        <Picker.Item label="Hazard" value="Hazard" />
-        <Picker.Item label="Building Fire" value="BuildingFire" />
-        <Picker.Item label="Scheduled Roadwork" value="ScheduledRoadwork" />
+        <Picker.Item label="Select A Incident" value="" />
+        <Picker.Item label="BREAKDOWN" value="BREAKDOWN" />
+        <Picker.Item label="CRASH" value="CRASH" />
+        <Picker.Item label="HAZARD" value="HAZARD" />
+        <Picker.Item label="CHANGED TRAFFIC CONDITIONS" value="CHANGED TRAFFIC CONDITIONS" />
+        <Picker.Item label="TRAFFIC LIGHTS BLACKED OUT" value="TRAFFIC LIGHTS BLACKED OUT" />
       </Picker>
 
       {/*------------ Select Street Name -----------------*/}
 
-      <Text>Select Street Name</Text>
-      <TextInput style={styles.picker} value={street} onChangeText={(text) => { setStreet(text) }}></TextInput>
+      <Text>Select Suburb Name</Text>
+      <TextInput style={styles.picker} value={suburb} onChangeText={(text) => { setSuburb(text) }}></TextInput>
 
-      <View>{isVisibleDisplayStreets} && {DisplayStreet()}</View>
+      <View>{isVisibleDisplayStreets} && {DisplaySuburb()}</View>
 
 
       {/*------------ Select Date (With in last three months) -----------------*/}
@@ -174,7 +184,7 @@ export default function Filters() {
 
       <Text>Search</Text>
       <View style={styles.button}>
-        <Button title="Search" onPress={() => {router.push("/Result")} }></Button>
+        <Button title="Search" onPress={() => {router.push(`/Result?region=${region}&category=${category}&suburb=${suburb}`)} }></Button>
       </View>
       <View style={styles.button}>
         <Button title="Go to Saved" onPress={() => router.push("/Saved")}></Button>
