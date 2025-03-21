@@ -10,23 +10,11 @@ import Result from "./Result"
 
 export default function Filters() {
 
-
   const router = useRouter();
-
-  // --------------- useState Hooks from Results sheet --------------------------
-
-  const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/open'
-  const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
 
   const [data, setData] = useState<any>('zerodata')
   const [dataArray, setDataArray] = useState<any>([])
   const [filteredArray, setFilteredArray] = useState([])
-
-  const [loading, setLoading] = useState(true)
-  const [isAnyError, setIsAnyError] = useState(false)
-  const errorMessage = 'An Error has Occured. Please Try Again'
-
-  // --------------- end useState Hooks from Results sheet --------------------------
 
   const [region, setRegion] = useState('');
   const [category, setCategory] = useState('');
@@ -36,13 +24,13 @@ export default function Filters() {
   const [show, setShow] = useState(false);
   const [isVisibleDisplayStreets, setIsVisibleDisplayStreets] = useState(true)
 
-  const onChange = (event: any, selectedDate?: Date) => {
-    setShow(false);
-    if (selectedDate) {
-      setDate(selectedDate);
-    }
-  };
+  const [loading, setLoading] = useState(true)
+  const [isAnyError, setIsAnyError] = useState(false)
+  const errorMessage = 'An Error has Occured. Please Try Again'
 
+
+  const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/open'
+  const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
 
   //------------ function for fetch data ------------------
 
@@ -67,15 +55,32 @@ export default function Filters() {
 
   //--------------------------------------------------------
 
-  //---------------- useEffect Hooks ----------------------
+  // --------------- function for Updating the Date --------------------------
 
-  useEffect(()=>{},[])
+  const changeDate = (event: any, selectedDate?: Date) => {
+    setShow(false);
+    if (selectedDate) {
+      setDate(selectedDate);
+    }
+  };
+  //--------------------------------------------------------------------------
+
+
+
+  //------------------ useEffect Hooks ----------------------
 
   useEffect(() => {
+    setCategory('')
+    setSuburb('')
+    setRegion('')
+
     setIsAnyError(false)
     fetchdata()
-  }, [suburb])
+  }, [])
 
+  //---------------------------------------------------------
+
+  //---------------- function to filter data for suberb search and update filtered Arra using useEffect Hook -----------------
 
   useEffect(() => {
     if (!suburb) {
@@ -83,51 +88,52 @@ export default function Filters() {
       return;
     }
     try {
-
       const filteredJson = dataArray?.filter((item: any) => item?.properties?.roads[0]?.suburb?.toLowerCase()?.includes(suburb?.toLowerCase()))
-
       setFilteredArray(filteredJson)
     }
     catch (error) {
       console.log(error)
     }
-
-
   }, [suburb, isVisibleDisplayStreets])
 
-  //--------------------------------------------------------
+  //----------------------------------------------------------------------------------------------------------------------------
 
-  //-------------- Display Suberb Function -------------------
+  //--------------Function for Display Suberb  -------------------
 
   function DisplaySuburb() {
 
-    return filteredArray?.map((item: any, key: number) => {
-      return (<View><TouchableOpacity key={item?.id} onPress={() => {
+
+
+    return filteredArray.slice(0,5)?.map((item: any, key: number) => {
+      return (
+      <TouchableOpacity key={item?.id} onPress={() => {
         setSuburb(item?.properties?.roads[0]?.suburb),
           setIsVisibleDisplayStreets(false)
-      }} > <Text key={item?.id}>
+      }} > 
+      <Text key={item?.id}>
           {JSON.stringify(item?.properties?.roads[0]?.suburb)}
-        </Text></TouchableOpacity></View>
+        </Text></TouchableOpacity>
       )
     })
-
   }
 
-  //---------------------------------------------------
+  //-----------------------------------------------------------------
+
+  //################################### RETURN BODY #####################################################
 
 
   return (
     <View style={styles.container}>
       <Text>Filters</Text>
 
-      {/*------------ Select State -----------------*/}
-      <Text>Select Region</Text>
+      {/*------------Picker to Select Region -----------------*/}
+      <Text>Region</Text>
       <Picker style={styles.picker}
         selectedValue={region}
         onValueChange={(itemValue, itemIndex) =>
           setRegion(itemValue)
         }>
-        <Picker.Item label="Select A Region" value="" />
+        <Picker.Item label="Select A Region" value="" enabled={false} color="gray" />
         <Picker.Item label="Sydney" value="Sydney" />
         <Picker.Item label="Central NSW" value="Central NSW" />
         <Picker.Item label="South Coast" value="South Coast" />
@@ -142,15 +148,15 @@ export default function Filters() {
         <Picker.Item label="Southern Highlands" value="Southern Highlands" />
       </Picker>
 
-      {/*------------ Select Accident Type -----------------*/}
+      {/*------------Picker to Select Accident Type -----------------*/}
 
-      <Text>Select Incident Type</Text>
-      <Picker style={styles.picker}
+      <Text>Incident Type</Text>
+      <Picker  style={styles.picker}
         selectedValue={category}
         onValueChange={(itemValue, itemIndex) =>
           setCategory(itemValue)
         }>
-        <Picker.Item label="Select A Incident" value="" />
+        <Picker.Item label="Select An Incident Type" value="" enabled={false} color="gray" />
         <Picker.Item label="BREAKDOWN" value="BREAKDOWN" />
         <Picker.Item label="CRASH" value="CRASH" />
         <Picker.Item label="HAZARD" value="HAZARD" />
@@ -158,15 +164,15 @@ export default function Filters() {
         <Picker.Item label="TRAFFIC LIGHTS BLACKED OUT" value="TRAFFIC LIGHTS BLACKED OUT" />
       </Picker>
 
-      {/*------------ Select Street Name -----------------*/}
+      {/*------------Picker Select Suberb Name -----------------*/}
 
-      <Text>Select Suburb Name</Text>
-      <TextInput style={styles.picker} value={suburb} onChangeText={(text) => { setSuburb(text) }}></TextInput>
+      <Text>Suburb</Text>
+      <TextInput placeholder='Search for a suburb' style={styles.picker} value={suburb} onChangeText={(text) => { setSuburb(text), setIsVisibleDisplayStreets(true) } }></TextInput>
 
       <View>{isVisibleDisplayStreets} && {DisplaySuburb()}</View>
 
 
-      {/*------------ Select Date (With in last three months) -----------------*/}
+      {/* ------------ Picker to Select Date (With in last three months) -----------------
 
       <Text>Select Date</Text>
       <TextInput style={styles.picker} value={date.toDateString()} onPress={() => setShow(true)} onChange={() => { setDate }}></TextInput>
@@ -176,23 +182,27 @@ export default function Filters() {
           value={date}
           mode="date"
           display="default"
-          onChange={onChange}
+          onChange={changeDate}
           maximumDate={new Date()}
           minimumDate={new Date(new Date().getFullYear(), new Date().getMonth() - 3, new Date().getDate())}
         />
-      )}
+      )} */}
 
-      <Text>Search</Text>
+{/*------------------- BUTTONS for SEARCH and SAVED --------------------------*/}
+
+      
       <View style={styles.button}>
-        <Button title="Search" onPress={() => {router.push(`/Result?region=${region}&category=${category}&suburb=${suburb}`)} }></Button>
+        <Button title="Search" onPress={() => { router.push(`/Result?region=${region}&category=${category}&suburb=${suburb}`) }}></Button>
       </View>
       <View style={styles.button}>
         <Button title="Go to Saved" onPress={() => router.push("/Saved")}></Button>
       </View>
-
     </View>
   )
 }
+
+ //########################################### END OF RETURN BODY #####################################################
+
 
 const styles = StyleSheet.create({
   container: {
@@ -208,7 +218,6 @@ const styles = StyleSheet.create({
     width: 300,
     height: 60,
     backgroundColor: '#Add8e6'
-
   },
 
 

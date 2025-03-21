@@ -1,7 +1,6 @@
 import { Text, View, StyleSheet, Button, ScrollView } from 'react-native'
 import React, { Component, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'expo-router';
-
 import { useLocalSearchParams } from 'expo-router';
 
 
@@ -14,9 +13,6 @@ export default function Result() {
 
   const router = useRouter()
 
-  const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/all'
-  const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
-
   const [data, setData] = useState<any>('zerodata')
   const [dataArray, setDataArray] = useState<any>([])
   const [filteredArray, setFilteredArray] = useState([])
@@ -25,8 +21,59 @@ export default function Result() {
   const [isAnyError, setIsAnyError] = useState(false)
   const errorMessage = 'An Error has Occured. Please Try Again'
 
+    const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/all'
+  const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
 
-  //------------ function for display trimmed data ------------------
+    //---------------- function for fetching data ----------------------
+
+    const fetchdata = async () => {
+
+      try {
+        const response = await fetch(fetchURL, { method: 'GET', headers: { "Authorization": token } })
+        const json = response.ok ? (await response.json()) : null
+        setData(json)
+        setDataArray(json?.features)
+        setLoading(false)
+  
+        if (!response.ok || response.status === 404 || response.status === 500) {
+          setIsAnyError(true)
+        }
+      }
+      catch (error) {
+        console.log('Error Message is:', error)
+        setIsAnyError(true)
+      }
+    }
+  
+    //-------------------------------------------------------------------
+
+      //---------------- useEffect Hook & Filter Array ----------------------
+
+  useEffect(() => {
+    setIsAnyError(false)
+    fetchdata()
+  }, [loading])
+
+  useEffect(() => {
+      // if (!suburb) {
+      //   setFilteredArray([]); // Reset if suburb is empty
+      //   return;
+      // }
+      try {
+        const filteredJson = dataArray?.filter((item: any) => item?.properties?.mainCategory?.toLowerCase()?.includes(categoryValue?.toLowerCase()) && item?.properties?.roads[0]?.suburb?.toLowerCase()?.includes(suburbValue?.toLowerCase()) && item?.properties?.roads[0]?.region?.toLowerCase()?.includes(regionValue?.toLowerCase()))
+
+        setFilteredArray(filteredJson)     
+      }
+      catch (error) {
+        console.log(error)
+      } 
+
+    }, [suburb,loading])
+
+  //--------------------------------------------------------
+
+
+  //---------------- function for display trimmed data ----------------------
 
   const displayData = () => {
 
@@ -43,6 +90,8 @@ export default function Result() {
 
     const [isVisible, setIsVisible] = useState(false)
     const [selectedItem, setSelectedItem] = useState(1)
+
+    if(filteredArray!=null){
 
     return (filteredArray?.map((item: incident, key: number) => {
       return (
@@ -64,65 +113,19 @@ export default function Result() {
             {/* <Text >* {JSON.stringify(item.properties.otherAdvice)}</Text> */}
 
           </View>}
-
         </View>
       )
     }))
 
   }
-
-  //--------------------------------------------------------
-
-  //------------ function for fetch data ------------------
-
-  const fetchdata = async () => {
-
-    try {
-      const response = await fetch(fetchURL, { method: 'GET', headers: { "Authorization": token } })
-      const json = response.ok ? (await response.json()) : null
-      setData(json)
-      setDataArray(json?.features)
-      setLoading(false)
-
-      if (!response.ok || response.status === 404 || response.status === 500) {
-        setIsAnyError(true)
-      }
-    }
-    catch (error) {
-      console.log('Error Message is:', error)
-      setIsAnyError(true)
-    }
+  else{
+    return<Text>There is No data to show</Text>
+  }
   }
 
   //--------------------------------------------------------
 
-  //---------------- useEffect Hook & Filter Array ----------------------
-
-  useEffect(() => {
-    setIsAnyError(false)
-    fetchdata()
-  }, [loading])
-
-  useEffect(() => {
-      // if (!suburb) {
-      //   setFilteredArray([]); // Reset if suburb is empty
-      //   return;
-      // }
-      try {
-        const filteredJson = dataArray?.filter((item: any) => item?.properties?.mainCategory?.toLowerCase()?.includes(categoryValue?.toLowerCase()) && item?.properties?.roads[0]?.suburb?.toLowerCase()?.includes(suburbValue?.toLowerCase()) && item?.properties?.roads[0]?.region?.toLowerCase()?.includes(regionValue?.toLowerCase()))
-
-
-        setFilteredArray(filteredJson)
-      
-      }
-      catch (error) {
-        console.log(error)
-      } 
-      
-      console.log(filteredArray)
-    }, [suburb,loading])
-
-  //--------------------------------------------------------
+    //################################### RETURN BODY #####################################################
 
   return (
     <ScrollView >
@@ -142,6 +145,8 @@ export default function Result() {
     </ScrollView>
   )
 }
+
+ //########################################### END OF RETURN BODY #####################################################
 
 const styles = StyleSheet.create({
   container: {
