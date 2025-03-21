@@ -2,9 +2,21 @@ import { Text, View, StyleSheet, Button, ScrollView } from 'react-native'
 import React, { Component, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'expo-router';
 import { useLocalSearchParams } from 'expo-router';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Result() {
+
+    const[retrievedData,setRetrievedData]=useState<any>()
+
+
+  interface savedIncident{
+    "Id":number,
+    "incident":String,
+    "road":String,
+    "suburb":String,
+    "adviceA":String,
+    "adviceB":String
+  };
 
   const { region, category, suburb } = useLocalSearchParams();
   const suburbValue = Array.isArray(suburb) ? suburb[0] : suburb;
@@ -21,8 +33,24 @@ export default function Result() {
   const [isAnyError, setIsAnyError] = useState(false)
   const errorMessage = 'An Error has Occured. Please Try Again'
 
+  const [isVisible, setIsVisible] = useState(false)
+  const [selectedItemID, setSelectedItemID] = useState(1)
+  const [selectedItem ,setSelectedItem]=useState <savedIncident|null>(null)
+
+  const [savedString,setSavedString]=useState('')
+  const [savedArray,setSavedArray]= useState <savedIncident[]> ([{
+    "Id":1,
+    "incident":'hehe',
+    "road":'yoyoy',
+    "suburb":'ssss',
+    "adviceA":'bromsy',
+    "adviceB":'ssss'
+  },])
+
     const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/all'
   const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
+
+
 
     //---------------- function for fetching data ----------------------
 
@@ -44,33 +72,63 @@ export default function Result() {
         setIsAnyError(true)
       }
     }
-  
-    //-------------------------------------------------------------------
+      //-------------------------------------------------------------------
 
-      //---------------- useEffect Hook & Filter Array ----------------------
+
+    //------------------------ useEffect Hooks  --------------------
+
+    useEffect(() => {
+      setIsAnyError(false)
+      fetchdata()
+    }, [loading])
+
+    useEffect(()=>{  // getting saved string data at the begining and pharse it in to Array
+      getData()
+    },[])
+
+
+    useEffect(()=>{ //*************** 2
+      if(savedString){
+        setSavedArray(JSON.parse(savedString))
+      } 
+    },[savedString])
+//---------------------------------------
+
+ //---------- use Effect for Save newly saved items to Array  ----------
+    useEffect(()=>{ //*************** 4
+
+    if (selectedItem && savedArray){
+      const tempArray = [...savedArray, selectedItem]
+      setSavedArray(tempArray)
+      console.log('saved from the button click')
+  }
+     },[selectedItem])
+  //--------------------------------------------------------------------
+
+  useEffect(()=>{  // Storing updated Array as a String *************** 5
+
+    if(savedArray){
+      const stringyfiedData = `${JSON.stringify(savedArray)}`
+      storeData(stringyfiedData)
+    }
+  },[savedArray])
+//---------------------------------------------------------------
+
+
+  //---------------- useEffect Hook to Filter Array --------------------
 
   useEffect(() => {
-    setIsAnyError(false)
-    fetchdata()
-  }, [loading])
 
-  useEffect(() => {
-      // if (!suburb) {
-      //   setFilteredArray([]); // Reset if suburb is empty
-      //   return;
-      // }
       try {
         const filteredJson = dataArray?.filter((item: any) => item?.properties?.mainCategory?.toLowerCase()?.includes(categoryValue?.toLowerCase()) && item?.properties?.roads[0]?.suburb?.toLowerCase()?.includes(suburbValue?.toLowerCase()) && item?.properties?.roads[0]?.region?.toLowerCase()?.includes(regionValue?.toLowerCase()))
-
         setFilteredArray(filteredJson)     
       }
-      catch (error) {
-        console.log(error)
+      catch (error) {    
       } 
 
     }, [suburb,loading])
-
   //--------------------------------------------------------
+
 
 
   //---------------- function for display trimmed data ----------------------
@@ -87,10 +145,6 @@ export default function Result() {
         otherAdvice: String;
       }
     }
-
-    const [isVisible, setIsVisible] = useState(false)
-    const [selectedItem, setSelectedItem] = useState(1)
-
     if(filteredArray!=null){
 
     return (filteredArray?.map((item: incident, key: number) => {
@@ -101,15 +155,28 @@ export default function Result() {
           <Text >Road: {JSON.stringify(item?.properties?.roads[0]?.mainStreet)}</Text>
           <Text >Suburb: {JSON.stringify(item?.properties?.roads[0]?.suburb)}</Text>
           <View style={styles.buttonRow}>
-            <View style={styles.button}> <Button title={'Save'} onPress={() => { }} ></Button></View>
-            <View style={styles.button}> <Button title={selectedItem === item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItem(item.id) }} ></Button></View>
+            <View style={styles.button}> 
+              <Button title={'Save'} onPress={() => { setSelectedItem( //***************3
+                {
+                  "Id":item.id,
+                  "incident":item?.properties?.displayName,
+                  "road":item?.properties?.roads[0]?.mainStreet,
+                  "suburb":item?.properties?.roads[0]?.suburb,
+                  "adviceA":item.properties.adviceA,
+                  "adviceB":item.properties.adviceB
+                }
+              ) 
+              
+              }} ></Button></View>
+            <View style={styles.button}> 
+              <Button title={selectedItemID === item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItemID(item.id) }} ></Button></View>
 
           </View>
-          {selectedItem === item.id && isVisible && <View>
+          {selectedItemID === item.id && isVisible && <View>
 
             <Text>Incident ID: {item.id}</Text>
-            <Text >*** {JSON.stringify(item.properties.adviceA)}</Text>
-            <Text >** {JSON.stringify(item.properties.adviceB)}</Text>
+            <Text >Advice A {JSON.stringify(item.properties.adviceA)}</Text>
+            <Text >Advice B {JSON.stringify(item.properties.adviceB)}</Text>
             {/* <Text >* {JSON.stringify(item.properties.otherAdvice)}</Text> */}
 
           </View>}
@@ -124,6 +191,35 @@ export default function Result() {
   }
 
   //--------------------------------------------------------
+
+  ////////////////////////////////special Area for Store Data Experiment//////////////////////////////
+  //----------------------------------------------------
+  
+  const storeData = async (sampleData:string) => {
+    try {
+      await AsyncStorage.setItem('my-key2', sampleData);
+    } catch (e) {
+      // saving error
+    }
+  };
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+const getData = async () => { //*************** 1
+  try {
+    const value = await AsyncStorage.getItem('my-key2');
+    if (value !== null) {
+   
+      console.log('on Result page', value)
+      setSavedString(value)
+     
+    }
+  } catch (e) {
+    // error reading value
+  }
+};
+
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
     //################################### RETURN BODY #####################################################
 
@@ -140,6 +236,7 @@ export default function Result() {
 
         <Text>{isAnyError ? errorMessage : null}</Text>
         {displayData()}
+
 
       </View>
     </ScrollView>

@@ -38,17 +38,18 @@ export default function Filters() {
 
     try {
       const response = await fetch(fetchURL, { method: 'GET', headers: { "Authorization": token } })
+      
       const json = response.ok ? (await response.json()) : null
 
       setData(json)
-      setDataArray(json?.features)
+      setDataArray(json?.features||[])
       setLoading(false)
       if (!response.ok || response.status === 404 || response.status === 500) {
         setIsAnyError(true)
       }
     }
     catch (error) {
-      console.log('Error Message is:', error)
+      console.log('Error Message from fetching data is:', error)
       setIsAnyError(true)
     }
   }
@@ -133,7 +134,7 @@ export default function Filters() {
         onValueChange={(itemValue, itemIndex) =>
           setRegion(itemValue)
         }>
-        <Picker.Item label="Select A Region" value="" enabled={false} color="gray" />
+        <Picker.Item label="Select A Region" value="" color="gray" />
         <Picker.Item label="Sydney" value="Sydney" />
         <Picker.Item label="Central NSW" value="Central NSW" />
         <Picker.Item label="South Coast" value="South Coast" />
@@ -156,7 +157,7 @@ export default function Filters() {
         onValueChange={(itemValue, itemIndex) =>
           setCategory(itemValue)
         }>
-        <Picker.Item label="Select An Incident Type" value="" enabled={false} color="gray" />
+        <Picker.Item label="Select An Incident Type" value="" color="gray" />
         <Picker.Item label="BREAKDOWN" value="BREAKDOWN" />
         <Picker.Item label="CRASH" value="CRASH" />
         <Picker.Item label="HAZARD" value="HAZARD" />
