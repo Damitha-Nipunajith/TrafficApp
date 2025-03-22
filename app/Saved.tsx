@@ -1,4 +1,4 @@
-import { Text, View,StyleSheet, Button } from 'react-native'
+import { Text, View,StyleSheet, Button, ScrollView } from 'react-native'
 import React, { Component, useEffect } from 'react'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,6 +11,9 @@ export default function Saved () {
 
   const[retrievedString,setRetrievedString]=useState<any>()
   const[retrievedData,setRetrievedData]=useState<any>()
+  const[filteredArray,setFilteredArray]=useState<any>([])
+  const[filteredArrayString,setFilteredArrayString]=useState<any>([])
+  const[deleteItemID,setDeleteItemID]=useState<any>()
 
   interface savedIncident{
     "Id":number,
@@ -23,9 +26,18 @@ export default function Saved () {
 
   const router=useRouter()
 
+
+  useEffect(()=>{
+    deleteItem()
+  },[deleteItemID])
+
   useEffect(()=>{
     getData()   
-  },[])
+  },[filteredArray])
+
+  useEffect(()=>{
+    loadData()   
+  },[retrievedData])
 
 useEffect(()=>{
   if(retrievedString){
@@ -36,7 +48,6 @@ useEffect(()=>{
 
 useEffect(()=>{
   if(retrievedData){
-    console.log('retrieved JSON: ',retrievedData)
     loadData()
   }
 
@@ -60,6 +71,47 @@ useEffect(()=>{
 
  //-----------------------------------------------------------------
 
+
+   //---------------function to delete selected items ------------------
+
+   const deleteItem = ()=>{
+    if (retrievedData && deleteItemID){
+    console.log('original array: ',retrievedData)
+    const tempArray = retrievedData.filter((oneItem:any)=>oneItem.Id!==deleteItemID)
+    setFilteredArray(tempArray)
+    console.log('deleted array:',filteredArray)
+   }
+    }
+
+
+
+  //-----------------------------------------------------------------
+
+  //---------------function to delete and save new saved Array  ------------------
+
+  useEffect(()=>{
+
+    if(filteredArray.length>0){
+      const tempString = JSON.stringify(filteredArray)
+      storeData(tempString)
+    }
+
+  },[filteredArray])
+
+    //-----------------------------------------------------------------
+  
+  //---------------function to Export saved Array  ------------------
+
+  const storeData = async (value:string) => {
+    try {
+      await AsyncStorage.setItem('my-key2', value);
+    } catch (e) {
+      // saving error
+    }
+  };
+
+   //-----------------------------------------------------------------
+
   //---------------function to display saved items ------------------
 
  const loadData =()=>{
@@ -68,24 +120,23 @@ useEffect(()=>{
   
       return (retrievedData?.map((item: savedIncident, key: number) => {
         return (
+
   
-          <View key={item.Id} style={styles.oneRowView}>
+          deleteItemID!==item.Id && <View key={item.Id} style={styles.oneRowView}>
             <Text >Incident: {JSON.stringify(item?.incident)}</Text>
             <Text >Road: {JSON.stringify(item?.road)}</Text>
             <Text >Suburb: {JSON.stringify(item?.suburb)}</Text>
             <View style={styles.buttonRow}>
               <View style={styles.button}> 
-                <Button title={'Delete'} onPress={() => {}} ></Button></View>
+                <Button title={'Delete'} onPress={() => { setSelectedItemID(item.Id) ,setDeleteItemID(item.Id)}} ></Button></View>
               <View style={styles.button}> 
                 <Button title={selectedItemID === item.Id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItemID(item.Id) }} ></Button></View>
   
             </View>
-            {selectedItemID === item.Id && isVisible && <View>
-  
+            { selectedItemID === item.Id && isVisible && <View>  
               <Text>Incident ID: {item.Id}</Text>
               <Text >Advice A {JSON.stringify(item?.adviceA)}</Text>
               <Text >Advice B {JSON.stringify(item?.adviceA)}</Text>
-
             </View>}
           </View>
         )
@@ -98,12 +149,17 @@ useEffect(()=>{
  
  //-----------------------------------------------------------------
 
-
     return (
       <View style={styles.container}>
         <Text>Saved</Text>
+        <View>
+          <Button title="back" onPress={router.back}></Button>
+        </View>
+        
+        <ScrollView>
         {loadData()}
-        <Text>{retrievedString}</Text>
+        </ScrollView>
+
       </View>
     )
   
