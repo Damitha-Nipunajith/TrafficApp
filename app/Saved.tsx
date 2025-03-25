@@ -123,9 +123,9 @@ useEffect(()=>{
 
   
           deleteItemID!==item.Id && <View key={item.Id} style={styles.oneRowView}>
-            <Text >Incident: {JSON.stringify(item?.incident)}</Text>
-            <Text >Road: {JSON.stringify(item?.road)}</Text>
-            <Text >Suburb: {JSON.stringify(item?.suburb)}</Text>
+            <Text >Incident: {item?.incident}</Text>
+            <Text >Road: {item?.road}</Text>
+            <Text >Suburb: {item?.suburb}</Text>
             <View style={styles.buttonRow}>
               <View style={styles.button}> 
                 <Button title={'Delete'} onPress={() => { setSelectedItemID(item.Id) ,setDeleteItemID(item.Id)}} ></Button></View>
@@ -135,8 +135,8 @@ useEffect(()=>{
             </View>
             { selectedItemID === item.Id && isVisible && <View>  
               <Text>Incident ID: {item.Id}</Text>
-              <Text >Advice A {JSON.stringify(item?.adviceA)}</Text>
-              <Text >Advice B {JSON.stringify(item?.adviceA)}</Text>
+              <Text >Advice A {item?.adviceA}</Text>
+              <Text >Advice B {item?.adviceA}</Text>
             </View>}
           </View>
         )

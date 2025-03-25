@@ -38,14 +38,7 @@ export default function Result() {
   const [selectedItem ,setSelectedItem]=useState <savedIncident|null>(null)
 
   const [savedString,setSavedString]=useState('')
-  const [savedArray,setSavedArray]= useState <savedIncident[]> ([{
-    "Id":1,
-    "incident":'hehe',
-    "road":'yoyoy',
-    "suburb":'ssss',
-    "adviceA":'bromsy',
-    "adviceB":'ssss'
-  },])
+  const [savedArray,setSavedArray]= useState <savedIncident[]> ([])
 
     const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/all'
   const token = 'apikey eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqdGkiOiJRdU52b2dTTG1idGVTT19RYURSN3FoWk1NZGNlMHJPUzFzSGxLNEdRR1B3IiwiaWF0IjoxNzQxOTU0MDg5fQ.fqNaar1F5UQ7-_QKnpeViY1C1Zu5umxceQ9ZDcrp4Qs'
@@ -151,9 +144,9 @@ export default function Result() {
       return (
 
         <View key={item.id} style={styles.oneRowView}>
-          <Text >Incident: {JSON.stringify(item?.properties?.displayName)}</Text>
-          <Text >Road: {JSON.stringify(item?.properties?.roads[0]?.mainStreet)}</Text>
-          <Text >Suburb: {JSON.stringify(item?.properties?.roads[0]?.suburb)}</Text>
+          <Text >Incident: {item?.properties?.displayName}</Text>
+          <Text >Road: {item?.properties?.roads[0]?.mainStreet}</Text>
+          <Text >Suburb: {item?.properties?.roads[0]?.suburb}</Text>
           <View style={styles.buttonRow}>
             <View style={styles.button}> 
               <Button title={'Save'} onPress={() => { setSelectedItem( //***************3
@@ -172,12 +165,13 @@ export default function Result() {
               <Button title={selectedItemID === item.id && isVisible ? 'Hide Info' : 'More info'} onPress={() => { setIsVisible(!isVisible), setSelectedItemID(item.id) }} ></Button></View>
 
           </View>
+
           {selectedItemID === item.id && isVisible && <View>
 
             <Text>Incident ID: {item.id}</Text>
-            <Text >Advice A {JSON.stringify(item.properties.adviceA)}</Text>
-            <Text >Advice B {JSON.stringify(item.properties.adviceB)}</Text>
-            {/* <Text >* {JSON.stringify(item.properties.otherAdvice)}</Text> */}
+            <Text >Advice A : {item.properties.adviceA}</Text>
+            <Text >Advice B : {item.properties.adviceB}</Text>
+            {/* <Text >{item.properties.otherAdvice}</Text> */}
 
           </View>}
         </View>
@@ -224,7 +218,7 @@ const getData = async () => { //*************** 1
     //################################### RETURN BODY #####################################################
 
   return (
-    <ScrollView >
+   
       <View style={styles.container}>
 
         <Text>Result</Text>
@@ -235,11 +229,14 @@ const getData = async () => { //*************** 1
         <Text>{loading ? 'loading...' : null}</Text>
 
         <Text>{isAnyError ? errorMessage : null}</Text>
+
+        <ScrollView >
         {displayData()}
+        </ScrollView>
 
 
       </View>
-    </ScrollView>
+    
   )
 }
 

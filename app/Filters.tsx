@@ -1,11 +1,11 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, Button } from 'react-native'
 import React from 'react'
 import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker';
+
 import { useState } from 'react';
 import { useEffect } from 'react';
 import { useRouter } from "expo-router";
-import Result from "./Result"
+
 
 
 export default function Filters() {
@@ -27,6 +27,8 @@ export default function Filters() {
   const [loading, setLoading] = useState(true)
   const [isAnyError, setIsAnyError] = useState(false)
   const errorMessage = 'An Error has Occured. Please Try Again'
+
+  const[refresh,setRefresh] = useState(false)
 
 
   const fetchURL = 'https://api.transport.nsw.gov.au/v1/live/hazards/incident/open'
@@ -77,7 +79,7 @@ export default function Filters() {
 
     setIsAnyError(false)
     fetchdata()
-  }, [])
+  }, [,refresh])
 
   //---------------------------------------------------------
 
@@ -103,8 +105,6 @@ export default function Filters() {
 
   function DisplaySuburb() {
 
-
-
     return filteredArray.slice(0,5)?.map((item: any, key: number) => {
       return (
       <TouchableOpacity key={item?.id} onPress={() => {
@@ -112,8 +112,8 @@ export default function Filters() {
           setIsVisibleDisplayStreets(false)
       }} > 
       <Text key={item?.id}>
-          {JSON.stringify(item?.properties?.roads[0]?.suburb)}
-        </Text></TouchableOpacity>
+          {item?.properties?.roads[0]?.suburb|| "No Suburb Available"}
+      </Text></TouchableOpacity>
       )
     })
   }
@@ -130,7 +130,7 @@ export default function Filters() {
       {/*------------Picker to Select Region -----------------*/}
       <Text>Region</Text>
       <Picker style={styles.picker}
-        selectedValue={region}
+        selectedValue={region||''}
         onValueChange={(itemValue, itemIndex) =>
           setRegion(itemValue)
         }>
@@ -153,7 +153,7 @@ export default function Filters() {
 
       <Text>Incident Type</Text>
       <Picker  style={styles.picker}
-        selectedValue={category}
+        selectedValue={category||''}
         onValueChange={(itemValue, itemIndex) =>
           setCategory(itemValue)
         }>
@@ -168,33 +168,22 @@ export default function Filters() {
       {/*------------Picker Select Suberb Name -----------------*/}
 
       <Text>Suburb</Text>
-      <TextInput placeholder='Search for a suburb' style={styles.picker} value={suburb} onChangeText={(text) => { setSuburb(text), setIsVisibleDisplayStreets(true) } }></TextInput>
+      <TextInput   placeholder='Search for a Suburb' style={styles.picker} value={suburb} onChangeText={(text) => { setSuburb(text), setIsVisibleDisplayStreets(true) } }></TextInput>
 
-      <View>{isVisibleDisplayStreets} && {DisplaySuburb()}</View>
+      <View>{isVisibleDisplayStreets && <DisplaySuburb/>}</View>
 
 
-      {/* ------------ Picker to Select Date (With in last three months) -----------------
 
-      <Text>Select Date</Text>
-      <TextInput style={styles.picker} value={date.toDateString()} onPress={() => setShow(true)} onChange={() => { setDate }}></TextInput>
-
-      {show && (
-        <DateTimePicker
-          value={date}
-          mode="date"
-          display="default"
-          onChange={changeDate}
-          maximumDate={new Date()}
-          minimumDate={new Date(new Date().getFullYear(), new Date().getMonth() - 3, new Date().getDate())}
-        />
-      )} */}
 
 {/*------------------- BUTTONS for SEARCH and SAVED --------------------------*/}
+
 
       
       <View style={styles.button}>
         <Button title="Search" onPress={() => { router.push(`/Result?region=${region}&category=${category}&suburb=${suburb}`) }}></Button>
       </View>
+      <View style={styles.button}>
+      <Button title="Refresh" onPress={() => { setRefresh(!refresh) }}></Button></View>
       <View style={styles.button}>
         <Button title="Go to Saved" onPress={() => router.push("/Saved")}></Button>
       </View>
@@ -219,7 +208,11 @@ const styles = StyleSheet.create({
     width: 300,
     height: 60,
     backgroundColor: '#Add8e6'
+    
   },
+  textInput:{
+color:"gray"
+  }
 
 
 });
