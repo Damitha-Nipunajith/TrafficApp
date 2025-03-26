@@ -8,6 +8,7 @@ import { useRouter } from "expo-router";
 
 
 
+
 export default function Filters() {
 
   const router = useRouter();
@@ -182,8 +183,11 @@ export default function Filters() {
       <View style={styles.button}>
         <Button title="Search" onPress={() => { router.push(`/Result?region=${region}&category=${category}&suburb=${suburb}`) }}></Button>
       </View>
-      <View style={styles.button}>
-      <Button title="Refresh" onPress={() => { setRefresh(!refresh) }}></Button></View>
+
+            <View style={styles.button}>
+            <Button title="Refresh" onPress={() => { setRefresh(!refresh) }}></Button>
+            </View>
+
       <View style={styles.button}>
         <Button title="Go to Saved" onPress={() => router.push("/Saved")}></Button>
       </View>
@@ -208,7 +212,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 60,
     backgroundColor: '#Add8e6'
-    
+
   },
   textInput:{
 color:"gray"
