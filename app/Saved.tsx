@@ -76,10 +76,10 @@ useEffect(()=>{
 
    const deleteItem = ()=>{
     if (retrievedData && deleteItemID){
-    console.log('original array: ',retrievedData)
+
     const tempArray = retrievedData.filter((oneItem:any)=>oneItem.Id!==deleteItemID)
     setFilteredArray(tempArray)
-    console.log('deleted array:',filteredArray)
+
    }
     }
 
